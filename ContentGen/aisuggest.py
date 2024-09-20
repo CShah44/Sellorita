@@ -3,6 +3,20 @@ from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
+import streamlit as st
+from langchain.agents import initialize_agent, AgentType
+from langchain.tools import Tool, DuckDuckGoSearchResults
+
+def make_prompt_for_ad_gen(req):
+    return "generate an ad for: " + req
+
+ad_gen_tool = Tool(
+    name="AdGenerator",
+    func = make_prompt_for_ad_gen,
+    description="Generates the prompt to generate an ad for the product"
+)
+
+search_tool = DuckDuckGoSearchResults()
 
 # Load API key from .env file
 load_dotenv()
@@ -11,8 +25,15 @@ api_key = os.getenv("GEMINI_API_KEY")
 # Initialize the language model
 llm = ChatGoogleGenerativeAI(model="gemini-pro", google_api_key=api_key)
 
+# Create the agent
+agent = initialize_agent(
+    tools=[search_tool, ad_gen_tool],
+    llm=llm,
+    agent_type=AgentType.REACT
+)
+
 # Define a prompt template
-prompt_template = PromptTemplate.from_template("You are a marketing assistant. Based on the user's requirements and details of their products, you should suggest steps they should follow to promote their product better. Suggest them market tactics to advertise their product well. Below are the details of their product: {query}")
+prompt_template = PromptTemplate.from_template("You are a marketing assistant. Your primary task is to suggest users marketing strategies to promote their product better, but you will also look at what the user is asking and perform other tasks, such as triggering methods to generate the ad based on user requirements: {query}")
 
 # Create a chain
 chain = LLMChain(
@@ -20,7 +41,13 @@ chain = LLMChain(
     prompt=prompt_template
 )
 
-# Example usage
-query = "We are launching a new innovative bottle that comes with loads of features. It has a newly designed body for enhanced thermal control, and has smart features like modifying the temperature of the water, analysing contents of the liquid in the bottle, and a built in stir feature. Help me advertise this"
-response = chain.run(query)
-print(response)
+# Streamlit app
+st.title("AI Marketing Assistant")
+
+query = st.text_input("Enter your query:")
+
+if st.button("Submit"):
+    response = agent.run(query)
+    
+    for chunk in response:
+        st.write_stream(chunk, end='', flush=True)

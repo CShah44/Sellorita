@@ -16,25 +16,17 @@ def query(payload):
 	return response.content
 
 # product_details is of format { product_name: "", product_description: "" }
-# brand_details is of format { brand_name: "", brand_vision: "", about_brand: "" }
-# user_description is like how the user would like the advertisement should be - engaging, unique, creative, etc
+# brand_details is of format { brand_name: "", about_brand: "" }
 # type_of_ad is like "social media campaign" or "billboard" or "print" or "sale offer"
+# target_audience is like "kids" or "teens" or "adults" or "seniors"
 
-def get_image(brand_details, product_details, user_description, type_of_ad):
+def get_image(brand_details, product_details, type_of_ad, target_audience):
 	
-    prompt = ""
+    prompt = f"You are an expert marketing assistant that is proficient in creating engaging promotional advertisements. Create a promotional advertisment for the brand name, {brand_details['brand_name']}. Here are some details about the brand: ${brand_details["about_brand"]}. Create an ad for their new product, {product_details['product_name']}. Here is the product description: {product_details["product_description"]} . The advertisement is for {type_of_ad}. The advertisement is targeted for {target_audience}. The ad should be creative, engaging and should catch the attention of the audience"
 
     image_bytes = query({ "inputs": prompt })
 
     # Convert image bytes to a PIL Image object
     image = Image.open(io.BytesIO(image_bytes))
 
-    # Save the image to a temporary file
-    temp_file = io.BytesIO()
-    image.save(temp_file, format='PNG')
-    temp_file.seek(0)
-    
-    return temp_file
-    
-
-   
+    return image
