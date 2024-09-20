@@ -1,27 +1,11 @@
-import requests
-import dotenv
-import os
-import io
-from PIL import Image
+import streamlit as st
 
-dotenv.load_dotenv()
-
-HF_TOKEN = os.getenv("HF_TOKEN")
-
-API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell"
-headers = {"Authorization": f"Bearer {HF_TOKEN}"}
-
-def query(payload):
-	response = requests.post(API_URL, headers=headers, json=payload)
-	return response.content
-
-image_bytes = query({
-	"inputs": "Astronaut riding a horse",
-})
-
-
-# Convert image bytes to a PIL Image object
-image = Image.open(io.BytesIO(image_bytes))
-
-# Display the image
-image.show()
+with st.form("form"):
+    st.write("Please fill the form")
+    product_name=st.text_input('Product_name')
+    product_description=st.text_input('Product_description')
+    brand_name=st.text_input('Brand_name')
+    brand_vision=st.text_input('Brand_description')
+    user_description=st.text_input('Describe how you want your ad to be')
+# type_of_ad is like "social media campaign" or "billboard" or "print" or "sale offer"
+    options=['social media','billboard','print','sale offer']
