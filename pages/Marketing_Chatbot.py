@@ -1,5 +1,5 @@
 import streamlit as st
-from ContentGen.aisuggest import sanitize_response, agent
+from ContentGen.marketing_chatbot import sanitize_response, agent
 
 query = st.text_input('AI MARKETING ASSISTANT')
 

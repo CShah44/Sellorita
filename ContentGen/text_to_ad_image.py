@@ -3,8 +3,6 @@ import dotenv
 import os
 import io
 from PIL import Image
-import torch
-from diffusers import StableDiffusionImg2ImgPipeline
 
 dotenv.load_dotenv()
 
@@ -31,17 +29,13 @@ def get_image(brand_details, product_details, type_of_ad, target_audience):
     # Convert image bytes to a PIL Image object
     image = Image.open(io.BytesIO(image_bytes))
 
-    #todo testing only 
-    model_id = "stabilityai/stable-diffusion-xl-refiner-1.0"
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    return image, image_bytes
 
-    pipe = StableDiffusionImg2ImgPipeline.from_pretrained(model_id)
-    pipe = pipe.to(device)
+def get_image_from_prompt(prompt):
+    image_bytes = query({ "inputs": prompt })
 
-    init_image = Image.open("path_to_your_initial_image.jpg").convert("RGB")
-    prompt = "A beautiful landscape painting"
+    # Convert image bytes to a PIL Image object
+    image = Image.open(io.BytesIO(image_bytes))
 
-    result = pipe(prompt=prompt, init_image=init_image, strength=0.75, guidance_scale=7.5)
-    result.images[0].save("output_image.png")
-
-    return 
+    return image
+      

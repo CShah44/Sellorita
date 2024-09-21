@@ -1,7 +1,8 @@
 import streamlit as st
 from io import BytesIO
 from PIL import Image
-from AdGen.text_to_ad_image import get_image
+from ContentGen.text_to_ad_image import get_image
+from ContentGen.image_to_video import generate_video_ad, test_video
 
 # Define the form
 with st.form("Form"):
@@ -47,9 +48,18 @@ if submit_button:
         "product_description": product_description
     }
 
-    image = get_image(brand_details, product_details, type_of_ad = selected_ad_type, target_audience = selected_audience)
+    image, image_bytes = get_image(brand_details, product_details, type_of_ad = selected_ad_type, target_audience = selected_audience)
     st.image(image, caption="Generated Ad Image")
     
+    # Convert the image to video
+    try:
+        video = generate_video_ad(image)
+        st.video(video)
+    except Exception as e:
+        st.error(f"Error generating video: {e}")
+        video = None
+
+
     buffer = BytesIO()
     image.save(buffer, format="PNG")
     buffer.seek(0)  # Reset the pointer to the beginning of the buffer
