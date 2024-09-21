@@ -1,43 +1,48 @@
 import streamlit as st
+import streamlit_shadcn_ui as ui
 from io import BytesIO
 from PIL import Image
 from ContentGen.text_to_ad_image import get_image
-from ContentGen.image_to_video import generate_video_ad, test_video
+from ContentGen.image_to_video import generate_video_ad
 
-# Define the form
-with st.form("Form"):
-    st.write("Please fill the form")
-    
-    # Input fields
-    product_name_input = st.text_input('Product Name')
-    product_description_input = st.text_input('Product Description')
-    brand_name_input = st.text_input('Brand Name')
-    about_brand_input = st.text_input('About Brand')
+# Page title
+st.title("Sellorita AdMaker AI")
+
+# Create a card for the Ad Creation Form
+with ui.card(key="card1"):
+    st.subheader("Ad Creation Form")
+
+    # Input fields with placeholders
+    product_name_input = ui.input("Product Name", placeholder="Enter product name")
+    product_description_input = ui.input("Product Description", placeholder="Enter product description")
+    brand_name_input = ui.input("Brand Name", placeholder="Enter brand name")
+    about_brand_input = ui.input("About Brand", placeholder="Tell us about your brand")
     
     # Dropdown selections
-    st.subheader("Type of ad:")
+    st.subheader("Type of Ad")
     type_ad = ['Social Media', 'Billboard', 'Print', 'Sale Offer']
-    selected_ad_type_input = st.selectbox("Select an option:", type_ad, key="1")
+    selected_ad_type_input = st.selectbox("Select an option", type_ad, key="1")
 
-    st.subheader("Target Audience:")
+    st.subheader("Target Audience")
     target_audience = ['Kids', 'Teens', 'Adults', 'All']
-    selected_audience_input = st.selectbox("Select an option:", target_audience, key="2")
+    selected_audience_input = st.selectbox("Select your audience", target_audience, key="2")
 
-    # Submit button for form
-    submit_button = st.form_submit_button(label="Submit")
+    # Form submit button
+    submit_button = st.button("Generate Ad")
 
 # Only assign values when the form is submitted
 if submit_button:
-    # Assign values to variables after form submission
+    # Capture values from form inputs
     product_name = product_name_input
     product_description = product_description_input
     brand_name = brand_name_input
     brand_info = about_brand_input
     selected_ad_type = selected_ad_type_input
     selected_audience = selected_audience_input
-    
-    st.write("Form submitted!")
 
+    ui.success("Ad creation in progress...")
+
+    # Collect brand and product details
     brand_details = {
         "brand_name": brand_name,
         "about_brand": brand_info
@@ -48,26 +53,27 @@ if submit_button:
         "product_description": product_description
     }
 
-    image, image_bytes = get_image(brand_details, product_details, type_of_ad = selected_ad_type, target_audience = selected_audience)
-    st.image(image, caption="Generated Ad Image")
-    
-    # Convert the image to video
+    # Generate image using ad generation function
+    image, image_bytes = get_image(brand_details, product_details, type_of_ad=selected_ad_type, target_audience=selected_audience)
+    ui.image(image, caption="Generated Ad Image", use_column_width=True)
+
+    # Convert image to video ad
     try:
         video = generate_video_ad(image)
-        st.video(video)
+        ui.video(video)
     except Exception as e:
-        st.error(f"Error generating video: {e}")
+        ui.error(f"Error generating video: {e}")
         video = None
 
-
+    # Convert the image for download
     buffer = BytesIO()
     image.save(buffer, format="PNG")
-    buffer.seek(0)  # Reset the pointer to the beginning of the buffer
+    buffer.seek(0)  # Reset buffer pointer
 
-    # Create a download button
-    st.download_button(
-        label="Download Image",
+    # Download button for the generated ad image
+    ui.download_button(
+        label="Download Ad Image",
         data=buffer,
-        file_name="your_ad.png",
+        file_name="ad_image.png",
         mime="image/png"
     )
