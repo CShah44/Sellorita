@@ -1,36 +1,66 @@
 import streamlit as st
-import streamlit_shadcn_ui as ui
 from io import BytesIO
 from PIL import Image
 from ContentGen.text_to_ad_image import get_image
 from ContentGen.image_to_video import generate_video_ad
 
-# Page title
+# Set page configuration
+st.set_page_config(page_title="Sellorita AdMaker AI", page_icon="💡", layout="wide")
+
+# Page title and description
 st.title("Sellorita AdMaker AI")
+st.markdown("""
+    <style>
+    .title {
+        color: #0073e6;
+    }
+    .subheader {
+        color: #0056b3;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# Create a card for the Ad Creation Form
-with ui.card(key="card1"):
-    st.subheader("Ad Creation Form")
+st.subheader("Create Stunning Advertisements")
+st.markdown("---")
 
-    # Input fields with placeholders
-    product_name_input = ui.input("Product Name", placeholder="Enter product name")
-    product_description_input = ui.input("Product Description", placeholder="Enter product description")
-    brand_name_input = ui.input("Brand Name", placeholder="Enter brand name")
-    about_brand_input = ui.input("About Brand", placeholder="Tell us about your brand")
-    
-    # Dropdown selections
-    st.subheader("Type of Ad")
+# Layout using columns for better organization
+col1, col2 = st.columns(2)
+
+# Column 1: Product Information
+with col1:
+    st.markdown("**Product Name**")
+    product_name_input = st.text_input("", placeholder="Enter product name", key="product_name")
+
+    st.markdown("**Product Description**")
+    product_description_input = st.text_input("", placeholder="Enter product description", key="product_description")
+
+    st.markdown("**Brand Name**")
+    brand_name_input = st.text_input("", placeholder="Enter brand name", key="brand_name")
+
+# Column 2: About Brand
+with col2:
+    st.markdown("**About Brand**")
+    about_brand_input = st.text_area("", placeholder="Tell us about your brand", height=150, key="about_brand")
+
+# Dropdown selections
+st.subheader("Ad Type and Target Audience")
+col3, col4 = st.columns(2)
+
+with col3:
+    st.markdown("**Type of Ad**")
     type_ad = ['Social Media', 'Billboard', 'Print', 'Sale Offer']
-    selected_ad_type_input = st.selectbox("Select an option", type_ad, key="1")
+    selected_ad_type_input = st.selectbox("", type_ad, key="ad_type")
 
-    st.subheader("Target Audience")
+with col4:
+    st.markdown("**Target Audience**")
     target_audience = ['Kids', 'Teens', 'Adults', 'All']
-    selected_audience_input = st.selectbox("Select your audience", target_audience, key="2")
+    selected_audience_input = st.selectbox("", target_audience, key="audience")
 
-    # Form submit button
-    submit_button = st.button("Generate Ad")
+# Button to generate ad
+st.markdown("---")
+submit_button = st.button("Generate Ad")
 
-# Only assign values when the form is submitted
+# Only assign values when the button is clicked
 if submit_button:
     # Capture values from form inputs
     product_name = product_name_input
@@ -40,7 +70,7 @@ if submit_button:
     selected_ad_type = selected_ad_type_input
     selected_audience = selected_audience_input
 
-    ui.success("Ad creation in progress...")
+    st.success("Ad creation in progress...")
 
     # Collect brand and product details
     brand_details = {
@@ -55,15 +85,15 @@ if submit_button:
 
     # Generate image using ad generation function
     image, image_bytes = get_image(brand_details, product_details, type_of_ad=selected_ad_type, target_audience=selected_audience)
-    ui.image(image, caption="Generated Ad Image", use_column_width=True)
+    
+    st.image(image, caption="Generated Ad Image", use_column_width=True)
 
     # Convert image to video ad
     try:
         video = generate_video_ad(image)
-        ui.video(video)
+        st.video(video)
     except Exception as e:
-        ui.error(f"Error generating video: {e}")
-        video = None
+        st.error(f"Error generating video: {e}")
 
     # Convert the image for download
     buffer = BytesIO()
@@ -71,9 +101,12 @@ if submit_button:
     buffer.seek(0)  # Reset buffer pointer
 
     # Download button for the generated ad image
-    ui.download_button(
+    st.download_button(
         label="Download Ad Image",
         data=buffer,
         file_name="ad_image.png",
-        mime="image/png"
+        mime="image/png",
+        key="download_button",
+        help="Click to download the generated ad image.",
+        button_type="primary"
     )

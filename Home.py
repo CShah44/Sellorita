@@ -1,35 +1,23 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 
-
 # Set page configuration
 st.set_page_config(page_title="Sellorita - Your AI Marketing Assistant", page_icon="💡", layout="wide")
 
 # Background image for the app
-page_bg_img = """
+page_bg_img = '''
 <style>
-[data-testid="stAppViewContainer"]{
-background-image: url("https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wwfDF8c2VhcmNofDF8fGZhbGx8ZW58MHx8fHwxNjIwOTY0MTQ1&ixlib=rb-1.2.1&q=80&w=1080
-");
-background-size: cover;
-background-position: center;
-}
-
-[data-testid="stHeader"]{
-background: rgba(0,0,0,0);
-}
-
-[data-testid="stToolbar"]{
-right: 2rem;
-}
-
-[data-testid="stSidebar"] > div:first-child{
-background-image: url("https://www.vezadigital.com/wp-content/uploads/2021/08/Sellorita-AI.png");
-background-size: cover;
-background-position: center;
+[data-testid="stAppViewContainer"] {
+    background-image: url("https://i.ibb.co/pwgp2Pm/download.jpg");
+    background-size: cover; /* Ensure the image covers the full area */
+    background-repeat: no-repeat; /* Prevent image repetition */
+    background-attachment: fixed; /* Keep the image fixed while scrolling */
+    background-position: center; /* Center the image */
+    height: 100vh; /* Ensure the background covers the full height */
 }
 </style>
-"""
+'''
+
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
 # Title and introduction
@@ -62,14 +50,11 @@ Jump in and explore Sellorita’s full potential to elevate your marketing effor
 #     icons=["house", "image", "chat-dots"],
 #     menu_icon="cast",
 #     default_index=0,
-#     orientation="horizontal"``
+#     orientation="horizontal"
 # )
 
 # if selected == "AdMaker":
-    
-
-
-    
+#     # AdMaker functionality here
 # elif selected == "Marketing Chatbot":
 #     st.write("Welcome to the Marketing Chatbot page.")
 #     # Marketing Chatbot functionality here

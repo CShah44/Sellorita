@@ -13,7 +13,6 @@ from langchain_core.messages import HumanMessage, AIMessage
 from langchain.memory import ConversationBufferMemory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 
-
 # Function to sanitize the response
 def sanitize_response(response):
     # Escape HTML
@@ -48,19 +47,17 @@ suggestion_chain = LLMChain(
     prompt=suggest_prompt_template
 )
 
-
 # Function to generate an ad image from the user's query
 def make_ad_from_req(req):
     try:
         # Generate an ad description using the language model
         ad_description = chain_for_ad_gen.run(req)
         # Generate an image based on the ad description
-        print(ad_description)
         gen_image = get_image_from_prompt(ad_description)
         st.image(gen_image, caption="Generated Ad Image")
         return gen_image
     except Exception as e:
-        print(f"Error handled: {e}")
+        print(f"Error handled in make AD: {e}")
         return "An error occurred while generating the ad. Please try again."
 
 # Define the tool
@@ -77,7 +74,7 @@ def suggest_market_strategies(req):
         print(market_tactic)
         return market_tactic
     except Exception as e:
-        print(f"Error handled: {e}")
+        print(f"Error handled in tactic : {e}")
         return "An error occurred while generating marketing strategies. Please try again."
 
 market_tactic_tool = Tool(
@@ -88,16 +85,14 @@ market_tactic_tool = Tool(
 
 tools_list = [ad_gen_tool, market_tactic_tool]
 
-##########################################################################################################
 chatbot_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",   
-            "You are an advanced marketing assistant.You have access to the following tools: {tools}. The user may give a good description of their product or just the product that they are trying to sell. Your roles are to suggest marketing strategies so that the user can promote their product better, or to work with other tools to help them get ads for their product. You must understand what the user wants, if you don't get it, ask them for a better context, like if they want suggestions for market tactics or want to get an ad generated. Take the action accordingly and it should be one of {tool_names}. {agent_scratchpad}",
+            "You are an advanced marketing assistant. You have access to the following tools: {tools}. The user may give a description of their product or just the product they are trying to sell. Your roles are to suggest marketing strategies or generate ads for their product. If you don't understand what the user wants, ask for more context. Use one of {tool_names} to assist the user. If you are unsure which tool to use, respond with your thoughts. {agent_scratchpad}",
         ),
         MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{input}"),
-        # MessagesPlaceholder(variable_name="agent_scratchpad"),
         ("ai", "{agent_scratchpad}"),
     ],
 )
@@ -111,7 +106,7 @@ agent_executor = AgentExecutor(
     tools=tools_list,
     verbose=True,
     handle_parsing_errors=True,
-    max_iterations=3,
+    max_iterations=10,
     memory=memory
 )
 
@@ -122,11 +117,9 @@ def generate_response(query):
                 "input": query,
             }
         )
-
+        print("got the response for chat")
+        print(response)
         return response["output"]
-    #returning nothin for now
     except Exception as e:
-        print(f"Error handled: {e}")
+        print(f"Error handled in generate res: {e}")
         return "An error occurred. Please try again."
-
-################################################################################################################################################3
