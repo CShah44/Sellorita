@@ -48,11 +48,9 @@ Sellorita is an advanced AI solution designed to elevate your marketing efforts.
 
 - **Advanced Customization:** Enable users to further customize ads and campaigns by adjusting color schemes, fonts, and templates.
 
-- **Analytics Dashboard:** Add a feature to track ad performance on social media platforms.
-
 - **Multi-Platform Campaign Deployment:** Allow direct posting of generated content to multiple social media accounts (e.g., Instagram, Facebook, Twitter) from within the app.
+
 - **Multi-Language Support:** Expand the chatbot and ad generation to support multiple languages, making Sellorita more versatile for global markets.
-- **Integration with E-commerce Platforms:** Allow integration with platforms like Shopify or WooCommerce to generate product-specific ads seamlessly.
 
 ## Installation
 
@@ -83,3 +81,35 @@ Sellorita is an advanced AI solution designed to elevate your marketing efforts.
    ```bash
    streamlit run main.py
    ```
+
+## Proposal
+
+https://docs.google.com/presentation/d/1NsWRoHhxH55TOiRWQ1LyZm8cCHF8dk3WsZK8liPO6M8/edit?usp=drive_link
+
+We Cooked and Served You a Delicious AI-Powered Marketing Assistant! 😎
+
+## Some Works by Our Sellorita
+
+<p align="center">
+  <img src="./Results/1.png" alt="Ad Image 1" width="200"/>
+  <img src="./Results/2.png" alt="Ad Image 2" width="200"/>
+  <img src="./Results/3.png" alt="Ad Image 3" width="200"/>
+</p>
+
+<p align="center">
+  <img src="./Results/4.jpeg" alt="Ad Image 4" width="200"/>
+  <img src="./Results/5.png" alt="Ad Image 5" width="200"/>
+  <img src="./Results/6.png" alt="Ad Image 6" width="200"/>
+</p>
+
+<p align="center">
+  <img src="./Results/7.png" alt="Ad Image 7" width="200"/>
+  <img src="./Results/8.png" alt="Ad Image 8" width="200"/>
+  <img src="./Results/9.png" alt="Ad Image 9" width="200"/>
+</p>
+
+### Team: TheBoyz
+
+- [Chaitya Shah](https://github.com/CShah44)
+- [Krishna Sai](https://github.com/melohub-xbit/)
+- [Hitanshu Seth](https://github.com/Hitanshu078)

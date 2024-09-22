@@ -1,18 +1,15 @@
+import base64
 import dotenv
 import os
-import uuid
 import streamlit as st
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema.output_parser import StrOutputParser
 from ContentGen.text_to_ad_image import get_image_from_prompt
-from langchain_core.messages import HumanMessage, AIMessage
-from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain_core.messages import HumanMessage
 from langgraph.prebuilt import create_react_agent
 from langchain_core.tools import tool
 from langgraph.checkpoint.memory import MemorySaver
-from streamlit_shadcn_ui import button
 from typing import List
 import time
 import re
@@ -52,8 +49,6 @@ def make_ad_from_req(request: str) -> str:
     image_prompt = f"Create an image for an ad about: {ad_text}"
     image_url = get_image_from_prompt(image_prompt)
 
-    print(image_url)
-
     my_img_urls.append(image_url)
 
 
@@ -84,13 +79,7 @@ def make_multiple_ads(request: str, no_of_ads: int) -> List[str]:
         image_prompt = f"Create an image for an ad about: {ad_prompt}"
         image_url = get_image_from_prompt(image_prompt)
         campaign_image_urls.append(image_url)
-    # my_img_urls.extend(results)
-    # return results
 
-    # Placeholder for image generation (replace with actual image generation when ready)
-    # image_urls = [get_image_from_prompt(image_prompt) for image_prompt in image_prompts]
-    # my_img_urls.extend(image_urls)
-    print(f"here are the image prompts\n{image_prompts}")
     return image_prompts
 
 @tool
@@ -148,17 +137,6 @@ def generate_ad_campaign(request: str, no_of_ads: int) -> List[str]:
 tools=[make_ad_from_req, suggest_marketing_tactics, generate_ad_campaign]
 memory = MemorySaver()
 
-# agent = create_react_agent(model, tools)
-# agent_executor = create_react_agent(model, tools, checkpointer=memory)
-
-
-# response1 = agent_executor.invoke(
-#     {"messages": [HumanMessage(content="Hi, I'm Bob!")]}, config1
-# )
-
-# for message in response1:
-#     print(message.content)
-
 def stream_markdown(response):
     placeholder = st.empty()
     full_response = ""
@@ -191,7 +169,6 @@ def chat_response_and_flow(query):
         if(message.type == "ai" and len(message.content) > 0 and len(message.response_metadata) > 0):
             to_return.append(message.content)
             response_in_chat_history.append(message.content)
-    print(to_return[0])
     return to_return[0]
 
 # Display chat chat_history from history on app rerun
@@ -221,10 +198,11 @@ if user_input := st.chat_input("Your input here..."):
     # Get response from the agent
     res = chat_response_and_flow(user_input)
 
+    st.spinner("Cooking up a response...")
+
     # Display assistant response in chat message container
     with st.chat_message("assistant"):
         stream_markdown(res)
-
 
     # Add assistant response to chat history
     for rsp in response_in_chat_history:
@@ -235,37 +213,64 @@ if user_input := st.chat_input("Your input here..."):
             st.session_state.chat_history.append({"role": "image", "content": img_url})
             with st.chat_message("image", avatar="🏞️"):
                 st.image(img_url, caption="Generated Ad Image", use_column_width=True)
-                buffer = BytesIO()
-                img_url.save(buffer, format="PNG")
-                buffer.seek(0)  # Reset buffer pointer
+                # buffer = BytesIO()
+                # img_url.save(buffer, format="PNG")
+                # buffer.seek(0)  # Reset buffer pointer
 
-                # Download button for the generated ad image
-                st.download_button(
-                label="Download Ad Image",
-                data=buffer,
-                file_name="ad_image.png",
-                mime="image/png",
-                key=img_url,
-                help="Click to download the generated ad image.",
-                )
+                # # Download button for the generated ad image
+                # st.download_button(
+                # label="Download Ad Image",
+                # data=buffer,
+                # file_name="ad_image.png",
+                # mime="image/png",
+                # key=img_url,
+                # help="Click to download the generated ad image.",
+                # )
+
+                img_byte_arr = BytesIO()
+                img_url.save(img_byte_arr, format='PNG')
+                img_byte_arr = img_byte_arr.getvalue()
+
+                # Encode image to base64
+                img_str = base64.b64encode(img_byte_arr).decode()
+
+                # Create download link
+                href = f'<a href="data:file/png;base64,{img_str}" download="generated_ad.png">Download Image</a>'
+                
+                # Display download button
+                st.markdown(href, unsafe_allow_html=True)
+                
     if(len(campaign_image_urls) > 0):
         st.session_state.chat_history.append({"role": "campaign", "content": campaign_image_urls})
         for img_url in campaign_image_urls:
             with st.chat_message("image", avatar="🏞️"):
                 st.image(img_url, caption="Generated Ad Image", use_column_width=True)
-                buffer = BytesIO()
-                img_url.save(buffer, format="PNG")
-                buffer.seek(0)  # Reset buffer pointer
+                # buffer = BytesIO()
+                # img_url.save(buffer, format="PNG")
+                # buffer.seek(0)  # Reset buffer pointer
 
-                # Download button for the generated ad image
-                st.download_button(
-                label="Download Ad Image",
-                data=buffer,
-                file_name="ad_image.png",
-                mime="image/png",
-                key=img_url,
-                help="Click to download the generated ad image.",
-                )
+                # # Download button for the generated ad image
+                # st.download_button(
+                # label="Download Ad Image",
+                # data=buffer,
+                # file_name="ad_image.png",
+                # mime="image/png",
+                # key=img_url,
+                # help="Click to download the generated ad image.",
+                # )
+
+                img_byte_arr = BytesIO()
+                img_url.save(img_byte_arr, format='PNG')
+                img_byte_arr = img_byte_arr.getvalue()
+
+                # Encode image to base64
+                img_str = base64.b64encode(img_byte_arr).decode()
+
+                # Create download link
+                href = f'<a href="data:file/png;base64,{img_str}" download="generated_ad.png">Download Image</a>'
+                
+                # Display download button
+                st.markdown(href, unsafe_allow_html=True)                
     # change this to add a video feature also in the chatbot
     # elif user_input == "addv":
     #     st.session_state.chat_history.append({"role": "video", "content": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"})

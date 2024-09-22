@@ -2,6 +2,7 @@ import requests
 import dotenv
 import os
 import io
+import time
 
 dotenv.load_dotenv()
 
@@ -25,38 +26,38 @@ def get_video_id(image):
         },
         data={
             "seed": 0,
-            "cfg_scale": 2.5,
-            "motion_bucket_id": 200
+            "cfg_scale": 3.5,
+            "motion_bucket_id": 150
         },
     )
 
     generated_id = response.json().get('id')
 
-    print(response.json())
-
     return generated_id
 
 def generate_video_ad(image):
-
     generation_id = get_video_id(image)
-
-    print(len(generation_id))
-
-    response = requests.request(
-        "GET",
-        f"https://api.stability.ai/v2beta/image-to-video/result/{generation_id}",
-        headers={
-            'accept': "video/*",  # Use 'application/json' to receive base64 encoded JSON
-            'authorization': f"Bearer {STABLITY_API_KEY}"
-        },
-    )
-
-    if response.status_code == 202:
-        print("Generation in-progress, try again in 10 seconds.")
-    elif response.status_code == 200:
-        print("Generation complete!")
-        return response.content
-    else:
-        print(response.json())
-        raise Exception(str(response.json()))
+    
+    max_attempts = 30  # Adjust this based on expected generation time
+    attempt = 0
+    
+    while attempt < max_attempts:
+        response = requests.request(
+            "GET",
+            f"https://api.stability.ai/v2beta/image-to-video/result/{generation_id}",
+            headers={
+                'accept': "video/*",
+                'authorization': f"Bearer {STABLITY_API_KEY}"
+            },
+        )
+        
+        if response.status_code == 200:
+            return response.content
+        elif response.status_code == 202:
+            time.sleep(10)  # Wait for 10 seconds before next attempt
+            attempt += 1
+        else:
+            raise Exception(str(response.json()))
+    
+    raise Exception("Video generation timed out")
 
