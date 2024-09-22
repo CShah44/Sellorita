@@ -15,11 +15,6 @@ def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
 
-# product_details is of format { product_name: "", product_description: "" }
-# brand_details is of format { brand_name: "", about_brand: "" }
-# type_of_ad is like "social media campaign" or "billboard" or "print" or "sale offer"
-# target_audience is like "kids" or "teens" or "adults" or "seniors"
-# kandinsky-community/kandinsky-2-2-decoder
 def get_image(brand_details, product_details, type_of_ad, target_audience):
 	
     prompt = f"You are an expert marketing assistant that is proficient in creating engaging promotional advertisements. Create a promotional advertisment for the brand name, {brand_details['brand_name']}. Here are some details about the brand: ${brand_details["about_brand"]}. Create an ad for their new product, {product_details['product_name']}. Here is the product description: {product_details["product_description"]} . The advertisement is for {type_of_ad}. The advertisement is targeted for {target_audience}. The ad should be creative, engaging and should catch the attention of the audience"
@@ -29,7 +24,7 @@ def get_image(brand_details, product_details, type_of_ad, target_audience):
     # Convert image bytes to a PIL Image object
     image = Image.open(io.BytesIO(image_bytes))
 
-    return image, image_bytes
+    return image
 
 def get_image_from_prompt(prompt):
     image_bytes = query({ "inputs": prompt })

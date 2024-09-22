@@ -7,17 +7,23 @@ st.set_page_config(page_title="Sellorita - Your AI Marketing Assistant", page_ic
 # Background image for the app
 page_bg_img = '''
 <style>
-[data-testid="stAppViewContainer"] {
-    background-image: url("https://i.ibb.co/pwgp2Pm/download.jpg");
+[data-testid="stAppViewContainer"] > .main {
+    background-image: url("https://i.ibb.co/vHCLNhZ/solid-background-nice-blue-ombre-bst4c8y6yr57m3mh.jpg");
     background-size: cover; /* Ensure the image covers the full area */
     background-repeat: no-repeat; /* Prevent image repetition */
     background-attachment: fixed; /* Keep the image fixed while scrolling */
     background-position: center; /* Center the image */
     height: 100vh; /* Ensure the background covers the full height */
+    z-index: 0; /* Keep it behind the content */
+}
+
+[data-testid="stSidebar"] {
+    z-index: 1; /* Ensure the sidebar is on top */
 }
 </style>
 '''
 
+# Inject the style into the app
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
 # Title and introduction

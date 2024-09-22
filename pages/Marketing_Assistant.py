@@ -37,6 +37,7 @@ if 'session_id_list' not in st.session_state:
 
 my_img_urls = []
 response_in_chat_history = []
+campaign_image_urls = []
 # Add a button to create a new session_id
 if button("New Session", variant="outline"):
     # Generate a new session_id not in session_id_set
@@ -48,6 +49,8 @@ if button("New Session", variant="outline"):
             break
     my_img_urls.clear()
     response_in_chat_history.clear()
+    campaign_image_urls.clear()
+    st.session_state.chat_history.clear()
     
     # Force a rerun of the Streamlit app
     st.experimental_rerun()
@@ -71,13 +74,16 @@ def make_ad_from_req(request: str) -> str:
     image_prompt = f"Create an image for an ad about: {ad_text}"
     image_url = get_image_from_prompt(image_prompt)
 
+    print(image_url)
+
     my_img_urls.append(image_url)
+
 
     return image_url
 
 @tool
 def make_multiple_ads(request: str, no_of_ads: int) -> List[str]:
-    """Based on the given request and the required number of ads / images, generate the images. Always use this tool only when asked to create a campaign of ads / images or when asked to generate / create multiple ads / images."""
+    """Based on the given request and the required number of ads / images, generate the images. Always use this tool only when asked to create a campaign of ads / images or when asked to generate / create multiple ads / images, and not when a single ad is needed."""
     prompt = ChatPromptTemplate.from_template(
         """
         You are a top-tier ad designer at a leading marketing firm, specializing in designing multiple compelling ads / images based on the requirement of how many the user wants. Your task is to craft {no_of_ads} concise and compelling prompts for an image generation model, and make sure the prompts are for image generation only, so that it generates / creates distinct, spectacular ads / images for the given requirement, and generates / creates the images / ads. Understand what the requirement is and focus on the key features and unique selling points of the product without mentioning technical details.
@@ -94,18 +100,12 @@ def make_multiple_ads(request: str, no_of_ads: int) -> List[str]:
     # Split the prompts into a list
     ad_prompt_list = [prompt.strip() for prompt in ad_prompts.split('-|-|-|')]
     image_prompts = [[f"Create an ad for: {ad_text}"] for ad_text in  ad_prompt_list]
-    # response_in_chat_history.extend(ad_prompt_list)
+    response_in_chat_history.extend(ad_prompt_list)
 
-    # results = []
-    # for ad_prompt in ad_prompt_list:
-    #     image_prompt = f"Create an image for an ad about: {ad_prompt}"
-    #     image_url = get_image_from_prompt(image_prompt)
-        
-    #     results.append({
-    #         'image_url': image_url,
-    #         'caption': ad_prompt,
-    #         'image_prompt': image_prompt
-    #     })
+    for ad_prompt in ad_prompt_list:
+        image_prompt = f"Create an image for an ad about: {ad_prompt}"
+        image_url = get_image_from_prompt(image_prompt)
+        campaign_image_urls.append(image_url)
     # my_img_urls.extend(results)
     # return results
 
@@ -122,19 +122,57 @@ def suggest_marketing_tactics(request: str) -> str:
         "You are a seasoned marketing assistant. Provide about 8, but less than 10 concise, effective marketing strategies to enhance product promotion. Be specific and to the point. Here is the user's query: {request}"
     )
     chain = prompt | model | StrOutputParser()
+
     response = chain.invoke({"request": request})
     return response
+
+def get_images(ad_concepts):
+    # Generate images for each ad concept
+    for concept in ad_concepts:
+        image_prompt = f"Create an advertisement image based on this concept: {concept}"
+        image_url = get_image_from_prompt(image_prompt)
+        campaign_image_urls.append(image_url)
+
+
+@tool
+def generate_ad_campaign(request: str, no_of_ads: int) -> List[str]:
+    
+    """Generate an ad campaign of social media posts images based on the given request and number of ads. This tool will always be used to generate images when asked to generate an ad campaign or when asked to generate multiple ads."""
+    prompt = ChatPromptTemplate.from_template(
+        """
+        You are a creative marketing expert tasked with generating an ad campaign who creates visually stunning advertisement images. Create {no_of_ads} unique and compelling ad concepts based on the following product or brand information:
+
+        {request}
+
+        Output format:
+        {no_of_ads} unique ad concepts, each separated by '---'.
+        
+        For each ad concept, provide:
+        1. A catchy headline (max 10 words)
+        2. A brief description of the visual elements (max 20 words)
+        3. A short tagline or call-to-action (max 10 words)
+
+        Always separate each ad concept with '---'.
+        """
+    )
+    chain = prompt | model | StrOutputParser()
+    campaign_response = chain.invoke({"request": request, "no_of_ads": no_of_ads})
+    
+    # Split the response into individual ad concepts
+    ad_concepts = [concept.strip() for concept in campaign_response.split('---')]
+    
+    get_images(ad_concepts)
+
+    return ad_concepts
+    
+    
 
 tools=[make_ad_from_req, suggest_marketing_tactics]
 memory = MemorySaver()
 
-agent = create_react_agent(model, tools)
-agent_executor = create_react_agent(model, tools, checkpointer=memory)
+# agent = create_react_agent(model, tools)
+# agent_executor = create_react_agent(model, tools, checkpointer=memory)
 
-# agent_executor = create_react_agent(model, tools)
-
-print("session id = ", st.session_state.session_id_list[-1])
-config = {"configurable": {"thread_id": f"{st.session_state.session_id_list[-1]}"}}
 
 # response1 = agent_executor.invoke(
 #     {"messages": [HumanMessage(content="Hi, I'm Bob!")]}, config1
@@ -162,19 +200,11 @@ def stream_markdown(response):
         else:
             time.sleep(0.01)
 
+agent_executor = create_react_agent(model, tools)
 def chat_response_and_flow(query):
-    # Get the chat history
-    recent_history = st.session_state.chat_history[-5:]
-  
-    chat_history = [HumanMessage(content=m["content"]) if m["role"] == "user" else AIMessage(content=m["content"]) 
-                    for m in recent_history if m["role"] in ["user", "assistant"]]
-    
-    # Add the new query
-    chat_history.append(HumanMessage(content=query))
     
     response = agent_executor.invoke(
-        {"messages": chat_history},
-        config=config,
+        {"messages": [HumanMessage(content=f"{query}")]},
         stream_mode="values"
     )
 
@@ -194,6 +224,10 @@ for message in st.session_state.chat_history:
     elif message["role"] == "video":
         with st.chat_message(message["role"], avatar="🎥"):  # Using an emoji as avatar
             st.video(message["content"])
+    elif message["role"] == "campaign":
+        for imgs in message["content"]:
+            with st.chat_message("image", avatar="🏞️"):
+                st.image(imgs)
     else:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
@@ -215,27 +249,45 @@ if user_input := st.chat_input("Your input here..."):
 
 
     # Add assistant response to chat history
-    st.session_state.chat_history.append({"role": "assistant", "content": response_in_chat_history[0]})
+    for rsp in response_in_chat_history:
+        st.session_state.chat_history.append({"role": "assistant", "content": rsp})
     #this means there was an image generated
     if(len(my_img_urls) > 0):
         for img_url in my_img_urls:
             st.session_state.chat_history.append({"role": "image", "content": img_url})
             with st.chat_message("image", avatar="🏞️"):
                 st.image(img_url, caption="Generated Ad Image", use_column_width=True)
-                # buffer = BytesIO()
-                # img_url.save(buffer, format="PNG")
-                # buffer.seek(0)  # Reset buffer pointer
+                buffer = BytesIO()
+                img_url.save(buffer, format="PNG")
+                buffer.seek(0)  # Reset buffer pointer
 
-                # # Download button for the generated ad image
-                # st.download_button(
-                # label="Download Ad Image",
-                # data=buffer,
-                # file_name="ad_image.png",
-                # mime="image/png",
-                # key="download_button",
-                # help="Click to download the generated ad image.",
-                # )
+                # Download button for the generated ad image
+                st.download_button(
+                label="Download Ad Image",
+                data=buffer,
+                file_name="ad_image.png",
+                mime="image/png",
+                key=img_url,
+                help="Click to download the generated ad image.",
+                )
+    if(len(campaign_image_urls) > 0):
+        st.session_state.chat_history.append({"role": "campaign", "content": campaign_image_urls})
+        for img_url in campaign_image_urls:
+            with st.chat_message("image", avatar="🏞️"):
+                st.image(img_url, caption="Generated Ad Image", use_column_width=True)
+                buffer = BytesIO()
+                img_url.save(buffer, format="PNG")
+                buffer.seek(0)  # Reset buffer pointer
 
+                # Download button for the generated ad image
+                st.download_button(
+                label="Download Ad Image",
+                data=buffer,
+                file_name="ad_image.png",
+                mime="image/png",
+                key=img_url,
+                help="Click to download the generated ad image.",
+                )
     # change this to add a video feature also in the chatbot
     # elif user_input == "addv":
     #     st.session_state.chat_history.append({"role": "video", "content": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"})

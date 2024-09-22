@@ -32,11 +32,15 @@ def get_video_id(image):
 
     generated_id = response.json().get('id')
 
+    print(response.json())
+
     return generated_id
 
 def generate_video_ad(image):
 
     generation_id = get_video_id(image)
+
+    print(len(generation_id))
 
     response = requests.request(
         "GET",
@@ -53,6 +57,6 @@ def generate_video_ad(image):
         print("Generation complete!")
         return response.content
     else:
+        print(response.json())
         raise Exception(str(response.json()))
-
 

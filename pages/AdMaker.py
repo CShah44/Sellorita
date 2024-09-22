@@ -50,7 +50,7 @@ if submit_button:
     product_details = {"product_name": product_name, "product_description": product_description}
 
     # Generate ad image
-    image, image_bytes = get_image(brand_details, product_details, type_of_ad=selected_ad_type, target_audience=selected_audience)
+    image = get_image(brand_details, product_details, type_of_ad=selected_ad_type, target_audience=selected_audience)
     st.image(image, caption="Generated Ad Image", use_column_width=True)
 
     # Generate video ad from the image
@@ -73,5 +73,4 @@ if submit_button:
         mime="image/png",
         key="download_button",
         help="Click to download the generated ad image.",
-        button_class="download-button"
     )
