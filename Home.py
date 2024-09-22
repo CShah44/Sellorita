@@ -40,10 +40,13 @@ With Sellorita, you can:
 ---
 
 ### What’s in Store?
-- **Page 1: AdMaker**  
+**AdMaker**   \n
 Create stunning, ready-to-use advertisements by simply inputting product details. Sellorita uses cutting-edge AI algorithms to generate ad images that perfectly fit your selected platform and audience.
 
-- **Page 2: Marketing Chatbot**  
+**Campaign Generator** \n
+This feature enables the creation of multiple visually appealing images designed specifically for social media promotion. By providing product details, the Campaign Generator crafts customized visuals to help effectively promote your product across platforms like Instagram, Facebook, and more. These images are tailored to engage your target audience and enhance the visibility of your brand online.
+             
+**Marketing Chatbot** \n
 Need help fine-tuning your marketing strategies? Sellorita's chatbot will assist you in generating comprehensive marketing plans, ideas for campaigns, and expert advice—all customized to your brand and goals.
 
 Jump in and explore Sellorita’s full potential to elevate your marketing efforts!
