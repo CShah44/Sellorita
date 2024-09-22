@@ -118,6 +118,3 @@ We Cooked and Served You a Delicious AI-Powered Marketing Assistant! 😎
 
 https://sellorita.streamlit.app/
 
-### Note
-
-Video generation does not work on the deployed version even though we have purchased credits. We are still figuring it out. Sorry for the inconvenience.
