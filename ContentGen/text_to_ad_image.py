@@ -7,6 +7,7 @@ from PIL import Image
 dotenv.load_dotenv()
 
 HF_TOKEN = os.getenv("HF_TOKEN")
+STABILITY_API_KEY = os.getenv("STABILITY_API_KEY")
 
 API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell"
 headers = {"Authorization": f"Bearer {HF_TOKEN}"}
@@ -15,11 +16,29 @@ def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
 
+    # response = requests.post(
+    #     f"https://api.stability.ai/v2beta/stable-image/generate/core",
+    #     headers={
+    #         "authorization": f"Bearer {STABILITY_API_KEY}",
+    #         "accept": "image/*"
+    #     },
+    #     files={"none": ''},
+    #     data={
+    #         "prompt": payload,
+    #     },
+    # )
+
+    # if response.status_code == 200:
+    #     return response.content
+    # else:
+    #     raise Exception(str(response.json()))
+
 def get_image(brand_details, product_details, type_of_ad, target_audience):
 	
     prompt = f"You are an expert marketing assistant that is proficient in creating engaging promotional advertisements. Create a promotional advertisment for the brand name, {brand_details['brand_name']}. Here are some details about the brand: ${brand_details["about_brand"]}. Create an ad for their new product, {product_details['product_name']}. Here is the product description: {product_details["product_description"]} . The advertisement is for {type_of_ad}. The advertisement is targeted for {target_audience}. The ad should be creative, engaging and should catch the attention of the audience"
 
     image_bytes = query({ "inputs": prompt })
+    # image_bytes = query(prompt)
 
     # Convert image bytes to a PIL Image object
     image = Image.open(io.BytesIO(image_bytes))
@@ -28,6 +47,7 @@ def get_image(brand_details, product_details, type_of_ad, target_audience):
 
 def get_image_from_prompt(prompt):
     image_bytes = query({ "inputs": prompt })
+    # image_bytes = query(prompt)
 
     # Convert image bytes to a PIL Image object
     image = Image.open(io.BytesIO(image_bytes))

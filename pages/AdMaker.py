@@ -54,11 +54,11 @@ if submit_button:
     st.image(image, caption="Generated Ad Image", use_column_width=True)
 
     # Generate video ad from the image
-    try:
-        video = generate_video_ad(image)
-        st.video(video)
-    except Exception as e:
-        st.error(f"Error generating video: {e}")
+    # try:
+    #     video = generate_video_ad(image)
+    #     st.video(video)
+    # except Exception as e:
+    #     st.error(f"Error generating video: {e}")
 
     # Convert image to a downloadable format
     buffer = BytesIO()

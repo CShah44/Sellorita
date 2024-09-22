@@ -29,32 +29,10 @@ st.markdown("# AI Marketing Assistant")
 # Initialize session state for chat history
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
-if 'session_id_list' not in st.session_state:
-    st.session_state.session_id_list = []
-    first_session_id = str(uuid.uuid4())
-    print("first session id = ", first_session_id)
-    st.session_state.session_id_list.append(first_session_id)
 
 my_img_urls = []
 response_in_chat_history = []
 campaign_image_urls = []
-# Add a button to create a new session_id
-if button("New Session", variant="outline"):
-    # Generate a new session_id not in session_id_set
-    while True:
-        new_session_id = str(uuid.uuid4())
-        print("new_session_id = ", new_session_id)
-        if new_session_id not in st.session_state.session_id_list:
-            st.session_state.session_id_list.append(new_session_id)
-            break
-    my_img_urls.clear()
-    response_in_chat_history.clear()
-    campaign_image_urls.clear()
-    st.session_state.chat_history.clear()
-    
-    # Force a rerun of the Streamlit app
-    st.experimental_rerun()
-
 dotenv.load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 
@@ -167,7 +145,7 @@ def generate_ad_campaign(request: str, no_of_ads: int) -> List[str]:
     
     
 
-tools=[make_ad_from_req, suggest_marketing_tactics]
+tools=[make_ad_from_req, suggest_marketing_tactics, generate_ad_campaign]
 memory = MemorySaver()
 
 # agent = create_react_agent(model, tools)
