@@ -13,9 +13,11 @@ from langgraph.prebuilt import create_react_agent
 from langchain_core.tools import tool
 from langgraph.checkpoint.memory import MemorySaver
 from streamlit_shadcn_ui import button
+from typing import List
 import time
 import re
 import warnings
+from io import BytesIO
 
 # Ignore specific warning types
 warnings.filterwarnings("ignore", message="Key 'title' is not supported in schema, ignoring", category=UserWarning)
@@ -60,7 +62,7 @@ model = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7, api_ke
 def make_ad_from_req(request: str) -> str:
     """Generate an image for an ad based on the given request. Always use this tool when asked to create or generate an image or an ad."""
     prompt = ChatPromptTemplate.from_template(
-        "You are a top-tier ad designer at a leading marketing firm. Your task is to craft a concise and compelling prompt for an image generation model, so that it generates an ad for the given requirement, and display the image.The user may say generate an ad or generate an image, but you should do this. Understand what the requirement is and focus on the key features and unique selling points of the product without mentioning technical details. Here is the product description {request}"
+        "You are a top-tier ad designer at a leading marketing firm. Your task is to craft a concise and compelling prompt for an image generation model, so that it generates an ad for the given requirement, and display / create / generate the image.The user may say generate an ad or generate an image, but you should do this. Understand what the requirement is and focus on the key features and unique selling points of the product without mentioning technical details. Here is the product description {request}."
     )
     chain = prompt | model | StrOutputParser()
     ad_text = chain.invoke({"request": request})
@@ -74,21 +76,44 @@ def make_ad_from_req(request: str) -> str:
     return image_url
 
 @tool
-def make_multiple_ads(request: str) -> str:
-    """Based on the given request and the required number of ads / images, generate the images. Always use this tool when asked to create or generate an image or an ad."""
+def make_multiple_ads(request: str, no_of_ads: int) -> List[str]:
+    """Based on the given request and the required number of ads / images, generate the images. Always use this tool only when asked to create a campaign of ads / images or when asked to generate / create multiple ads / images."""
     prompt = ChatPromptTemplate.from_template(
-        "You are a top-tier ad designer at a leading marketing firm, specializing in designing multiple compelling ads / images based on the requirement of how many the user wants. Your task is to craft multiple concise and compelling prompts for an image generation model, so that it generates distinct, spectacular ads for the given requirement, and displays the images.The user may say generate multiple ads or generate some images, but you should do this. Understand what the requirement is and focus on the key features and unique selling points of the product without mentioning technical details. Here is the product description {request}, and the number of ads they want {num_of_ads}"
+        """
+        You are a top-tier ad designer at a leading marketing firm, specializing in designing multiple compelling ads / images based on the requirement of how many the user wants. Your task is to craft {no_of_ads} concise and compelling prompts for an image generation model, and make sure the prompts are for image generation only, so that it generates / creates distinct, spectacular ads / images for the given requirement, and generates / creates the images / ads. Understand what the requirement is and focus on the key features and unique selling points of the product without mentioning technical details.
+
+        Here is the product description: {request}. 
+
+        Please provide {no_of_ads} unique ad prompts, each separated by '-|-|-|'.
+        """
     )
     chain = prompt | model | StrOutputParser()
-    ad_text = chain.invoke({"request": request})
+    ad_prompts = chain.invoke({"request": request, "no_of_ads":no_of_ads})
     
-    # Generate an image for the ad
-    image_prompt = f"Create an image for an ad about: {ad_text}"
-    image_url = get_image_from_prompt(image_prompt)
+    
+    # Split the prompts into a list
+    ad_prompt_list = [prompt.strip() for prompt in ad_prompts.split('-|-|-|')]
+    image_prompts = [[f"Create an ad for: {ad_text}"] for ad_text in  ad_prompt_list]
+    # response_in_chat_history.extend(ad_prompt_list)
 
-    my_img_urls.append(image_url)
+    # results = []
+    # for ad_prompt in ad_prompt_list:
+    #     image_prompt = f"Create an image for an ad about: {ad_prompt}"
+    #     image_url = get_image_from_prompt(image_prompt)
+        
+    #     results.append({
+    #         'image_url': image_url,
+    #         'caption': ad_prompt,
+    #         'image_prompt': image_prompt
+    #     })
+    # my_img_urls.extend(results)
+    # return results
 
-    return image_url
+    # Placeholder for image generation (replace with actual image generation when ready)
+    # image_urls = [get_image_from_prompt(image_prompt) for image_prompt in image_prompts]
+    # my_img_urls.extend(image_urls)
+    print(f"here are the image prompts\n{image_prompts}")
+    return image_prompts
 
 @tool
 def suggest_marketing_tactics(request: str) -> str:
@@ -103,6 +128,7 @@ def suggest_marketing_tactics(request: str) -> str:
 tools=[make_ad_from_req, suggest_marketing_tactics]
 memory = MemorySaver()
 
+agent = create_react_agent(model, tools)
 agent_executor = create_react_agent(model, tools, checkpointer=memory)
 
 # agent_executor = create_react_agent(model, tools)
@@ -196,6 +222,19 @@ if user_input := st.chat_input("Your input here..."):
             st.session_state.chat_history.append({"role": "image", "content": img_url})
             with st.chat_message("image", avatar="🏞️"):
                 st.image(img_url, caption="Generated Ad Image", use_column_width=True)
+                # buffer = BytesIO()
+                # img_url.save(buffer, format="PNG")
+                # buffer.seek(0)  # Reset buffer pointer
+
+                # # Download button for the generated ad image
+                # st.download_button(
+                # label="Download Ad Image",
+                # data=buffer,
+                # file_name="ad_image.png",
+                # mime="image/png",
+                # key="download_button",
+                # help="Click to download the generated ad image.",
+                # )
 
     # change this to add a video feature also in the chatbot
     # elif user_input == "addv":
