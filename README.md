@@ -2,6 +2,17 @@
 
 Sellorita is an advanced AI solution designed to elevate your marketing efforts. Whether you're looking to generate high-quality visual content, develop marketing strategies, or plan campaigns for social media, Sellorita has you covered.
 
+# Sellorita - AI-Powered Marketing Assistant
+
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)](https://streamlit.io)
+[![LangChain](https://img.shields.io/badge/LangChain-Latest-green.svg)](https://langchain.org)
+[![Gemini](https://img.shields.io/badge/Gemini-AI-purple.svg)](https://deepmind.google/technologies/gemini/)
+[![Hugging Face](https://img.shields.io/badge/🤗-Hugging_Face-orange.svg)](https://huggingface.co)
+[![Stability AI](https://img.shields.io/badge/Stability-AI-lightblue.svg)](https://stability.ai)
+[![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen.svg)](http://makeapullrequest.com)
+
+
 ## Features
 
 ### 1. **Product Ad Generator**
